@@ -1,0 +1,17 @@
+on:
+  pull_request_target:
+    branches:
+      - main
+jobs:
+  something:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+        run: |
+          echo $EVENT_CONTEXT
+      - env:
+          HEAD_SHA: ${{ github.event.pull_request_target.head.sha }}
+        run: |
+          echo $HEAD_SHA
+      - run: echo ${{ github.event.pull_request_target.head.sha }}
