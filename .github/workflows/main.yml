@@ -1,17 +1,19 @@
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
+    types:
+      - opened
+      - closed
+      - reopened
+      - synchronize
 jobs:
   something:
     runs-on: ubuntu-latest
     steps:
-      - env:
+      - name: Dump Event JSON
+        shell: bash
+        env:
           EVENT_CONTEXT: ${{ toJSON(github.event) }}
         run: |
           echo $EVENT_CONTEXT
-      - env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          echo $HEAD_SHA
-      - run: echo ${{ github.event.pull_request.head.sha }}
