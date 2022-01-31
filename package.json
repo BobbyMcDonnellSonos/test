@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@lwc/eslint-plugin-lwc": "^1.0.1",
+    "@microsoft/eslint-formatter-sarif": "^2.1.5",
     "@prettier/plugin-xml": "^0.13.1",
     "@salesforce/eslint-config-lwc": "^2.0.0",
     "@salesforce/eslint-plugin-aura": "^2.0.0",
