@@ -29,6 +29,9 @@ jobs:
       - run: gh --version
   commit:
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.base.ref == 'main' }}
+    if: >-
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.closed == true &&
+      github.event.merged == true
     steps:
       - run: gh --version
