@@ -3,8 +3,8 @@ name: "ESLint Analysis"
 on:
   pull_request:
     paths:
-      - "**/aura/*"
-      - "**/lwc/*"
+      - "**/aura/**"
+      - "**/lwc/**"
 jobs:
   run-eslint:
     name: ESLint Run
@@ -27,9 +27,9 @@ jobs:
           gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files | map(.path)[] | select(contains("/aura/") or contains("/lwc/"))' |
           xargs node_modules/.bin/eslint -o "$RESULT_FILE" -f @microsoft/eslint-formatter-sarif
       - uses: github/codeql-action/upload-sarif@v1
-        if: ${{ steps.eslint.conclusion == "failure" }}
+        if: steps.eslint.conclusion == 'failure'
         with:
           sarif_file: ${{ env.RESULT_FILE }}
       - name: Fail on error
-        if: ${{ steps.eslint.conclusion == "failure" }}
+        if: steps.eslint.conclusion == 'failure'
         run: exit 1
