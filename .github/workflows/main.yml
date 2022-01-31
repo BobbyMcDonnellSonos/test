@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 on:
   pull_request:
     branches:
@@ -7,14 +8,27 @@ on:
       - closed
       - reopened
       - synchronize
+  push:
+    branches:
+      - main
+defaults:
+  run:
+    shell: bash
 jobs:
-  something:
+  dump-event:
     runs-on: ubuntu-latest
     steps:
       - name: Dump Event JSON
-        shell: bash
         env:
           EVENT_CONTEXT: ${{ toJSON(github.event) }}
         run: |
           echo $EVENT_CONTEXT
+  gh-check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh --version
+  commit:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.base.ref == 'main' }}
+    steps:
       - run: gh --version
