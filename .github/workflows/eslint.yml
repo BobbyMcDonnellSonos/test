@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "ESLint Analysis"
+on:
+  pull_request:
+    paths:
+      - "**/aura/*"
+      - "**/lwc/*"
+jobs:
+  run-eslint:
+    name: ESLint Run
+    runs-on: ubuntu-latest
+    env:
+      RESULT_FILE: results.sarif.json
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Run NPM install
+        run: npm install
+      - name: Run ESLint
+        # eslint exits 1 if it finds anything to report
+        id: eslint
+        continue-on-error: true
+        run: |
+          gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files | map(.path)[] | select(contains("/aura/") or contains("/lwc/"))' |
+          xargs node_modules/.bin/eslint -o "$RESULT_FILE" -f @microsoft/eslint-formatter-sarif
+      - uses: github/codeql-action/upload-sarif@v1
+        if: ${{ steps.eslint.conclusion == "failure" }}
+        with:
+          sarif_file: ${{ env.RESULT_FILE }}
+      - name: Fail on error
+        if: ${{ steps.eslint.conclusion == "failure" }}
+        run: exit 1
