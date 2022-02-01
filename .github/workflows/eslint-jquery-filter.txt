@@ -1,0 +1,16 @@
+.[] | . as $row | .messages | map({
+  severity: (
+    if .severity < 2 then "error"
+    elif .severity < 5 then "warn"
+    else "notice"
+    end
+  ),
+  values: [
+    { key: "file", value:($row.filePath | ltrimstr($root)) },
+    { key: "line", value: .line },
+    { key: "endLine", value: .endLine },
+    { key: "col", value: .column },
+    { key: "endColumn", value: .endColumn },
+    { key: "title", value: "\(.ruleId)::\(.message)" }
+  ]
+})[]| "::\(.severity) \(.values | map("\(.key)=\(.value)") | join(","))"
