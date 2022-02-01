@@ -6,7 +6,7 @@ on:
       - "**/aura/**"
       - "**/lwc/**"
 jobs:
-  eslint:
+  run-eslint:
     name: ESLint Run
     runs-on: ubuntu-latest
     steps:
@@ -18,10 +18,26 @@ jobs:
       - name: Run ESLint
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JQ_QUERY_GITHUB: |
+          JQ_QUERY_GITHUB: >
             .files | map(.path)[] | select(contains("/aura/") or contains("/lwc/"))
-          JQ_QUERY_ESLINT_FILTER_FILE: ./.github/workflows/eslint-jquery-filter.txt
+          JQ_QUERY_ESLINT: |
+            .[] | . as $row | .messages | map({
+              severity: (
+                if .severity < 2 then "error"
+                elif .severity < 5 then "warn"
+                else "notice"
+                end
+              ),
+              values: [
+                { key: "file", value:($row.filePath | ltrimstr($root)) },
+                { key: "line", value: .line },
+                { key: "endLine", value: .endLine },
+                { key: "col", value: .column },
+                { key: "endColumn", value: .endColumn },
+                { key: "title", value: "\(.ruleId)::\(.message)" }
+              ]
+            })[]| "::\(.severity) \(.values | map("\(.key)=\(.value)") | join(","))"
         run: |
           gh pr view ${{ github.event.number }} --json files --jq "$JQ_QUERY_GITHUB" |
           xargs node_modules/.bin/eslint -f json |
-          jq --arg root -f "$JQ_QUERY_ESLINT_FILTER_FILE" -r "$JQ_QUERY_ESLINT"
+          jq --arg root "${{ github.workspace }} -r "$JQ_QUERY_ESLINT"
