@@ -9,24 +9,35 @@ jobs:
   run-eslint:
     name: ESLint Run
     runs-on: ubuntu-latest
-    env:
-      FILE_LIST: files-to-lint.txt
-      RESULT_FILE: results.sarif.json
-    permissions:
-      security-events: write
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: Run NPM install
         run: npm install
-      - name: Collect Files to Lint
+      - name: Run ESLint
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr view ${{ github.event.number }} --json files --jq '.files | map(.path)[] | select(contains("/aura/") or contains("/lwc/"))' > $FILE_LIST
-      - name: Run ESLint
-        run: cat $FILE_LIST | xargs node_modules/.bin/eslint -o "$RESULT_FILE" -f @microsoft/eslint-formatter-sarif
-      - uses: github/codeql-action/upload-sarif@v1
-        if: always()
-        with:
-          sarif_file: ${{ env.RESULT_FILE }}
+          JQ_QUERY_GITHUB: >
+            .files | map(.path)[] | select(contains("/aura/") or contains("/lwc/"))
+          JQ_QUERY_ESLINT: |
+            .[] | . as $row | .messages | map({
+              severity: (
+                if .severity < 2 then "error"
+                elif .severity < 5 then "warn"
+                else "notice"
+                end
+              ),
+              values: [
+                { key: "file", value:($row.filePath | ltrimstr($root)) },
+                { key: "line", value: .line },
+                { key: "endLine", value: .endLine },
+                { key: "col", value: .column },
+                { key: "endColumn", value: .endColumn },
+                { key: "title", value: "\(.ruleId)::\(.message)" }
+              ]
+            })[]| "::\(.severity) \(.values | map("\(.key)=\(.value)") | join(","))"
+        run: |
+          gh pr view ${{ github.event.number }} --json files --jq "$JQ_QUERY_GITHUB" |
+          xargs node_modules/.bin/eslint -f json |
+          jq --arg root "${{ github.workspace }} -r "$JQ_QUERY_ESLINT"
