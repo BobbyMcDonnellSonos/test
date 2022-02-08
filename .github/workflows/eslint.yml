@@ -22,7 +22,7 @@ jobs:
         run: npm install
       - name: Run ESLint
         run: |
-          git diff --name-only -z ${{ event.pull_request.base.sha }} HEAD -- "**/aura/**.js" "**/lwc/**.js" |
+          git diff --name-only -z ${{ github.event.pull_request.base.sha }} HEAD -- "**/aura/**.js" "**/lwc/**.js" |
           xargs -0 node_modules/.bin/eslint -o "$RESULT_FILE" -f @microsoft/eslint-formatter-sarif
       - uses: github/codeql-action/upload-sarif@v1
         if: always()
