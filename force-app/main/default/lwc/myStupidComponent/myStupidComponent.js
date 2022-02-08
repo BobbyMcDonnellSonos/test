@@ -1,8 +1,8 @@
 import { LightningElement } from "lwc";
 
 export default class MyStupidComponent extends LightningElement {
-    0MyTerribleVar = null;
-  fun() {
-     console.log(1);
-  }
+    fun() {
+      return non_existant();
+      return this.MyTerribleVar
+    }
 }
