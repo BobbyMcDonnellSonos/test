@@ -3,8 +3,8 @@ name: "ESLint Analysis"
 on:
   pull_request:
     paths:
-      - "**/aura/**"
-      - "**/lwc/**"
+      - "**/aura/**.js"
+      - "**/lwc/**.js"
 jobs:
   run-eslint:
     name: ESLint Run
@@ -16,16 +16,12 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
       - name: Run NPM install
         run: npm install
-      - name: Collect Files to Lint
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr view ${{ github.event.number }} --json files --jq '.files | map(.path)[] | select(contains("/aura/") or contains("/lwc/"))' > $FILE_LIST
       - name: Run ESLint
-        run: cat $FILE_LIST | xargs node_modules/.bin/eslint -o "$RESULT_FILE" -f @microsoft/eslint-formatter-sarif
+        run: |
+          git diff --name-only -z HEAD^ HEAD -- "**/aura/**.js" "**/lwc/**.js" |
+          xargs -0 node_modules/.bin/eslint -o "$RESULT_FILE" -f @microsoft/eslint-formatter-sarif
       - uses: github/codeql-action/upload-sarif@v1
         if: always()
         with:
