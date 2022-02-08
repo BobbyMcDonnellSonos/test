@@ -16,13 +16,11 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: Run NPM install
         run: npm install
       - name: Run ESLint
         run: |
-          git diff --name-only -z ${{ github.base_ref }} HEAD -- "**/aura/**.js" "**/lwc/**.js" |
+          git diff --name-only -z ${{ github.sha }}^ ${{ github.sha }} -- "**/aura/**.js" "**/lwc/**.js" |
           xargs -0 node_modules/.bin/eslint -o "$RESULT_FILE" -f @microsoft/eslint-formatter-sarif
       - uses: github/codeql-action/upload-sarif@v1
         if: always()
