@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FILE_LIST: files-to-lint.txt
-      RESULT_FILE: results.sarif.json
+      RESULT_FILE: ./results.sarif.json
     permissions:
       security-events: write
     steps:
@@ -26,5 +26,11 @@ jobs:
           xargs -0 node_modules/.bin/eslint -o "$RESULT_FILE" -f @microsoft/eslint-formatter-sarif
       - uses: github/codeql-action/upload-sarif@v1
         if: always()
+        id: upload_sarif
         with:
+          ref: ${{ github.ref }}
+          sha: ${{ github.sha }}
           sarif_file: ${{ env.RESULT_FILE }}
+          wait-for-processing: true
+      - run: echo "${{ steps.upload-sarif.output.sarif-id }}"
+      - run: cat ${{ env.RESULT_FILE }}
