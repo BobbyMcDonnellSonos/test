@@ -18,6 +18,7 @@ on:
       - "**/classes/*.cls"
       - "**/lwc/**.js"
       - "**/triggers/*.trigger"
+  workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -66,8 +67,7 @@ jobs:
             git ls-files --full-name -z -- "**/aura/**.js" "**/lwc/**.js"
           fi |
 
-          xargs -0 node_modules/.bin/eslint -f node_modules/@microsoft/eslint-formatter-sarif/sarif.js -o results.sarif
-
+          xargs -0 node_modules/.bin/eslint -f node_modules/@microsoft/eslint-formatter-sarif/sarif.js -o results.sarif ||
           echo "ESLINT_STATUS=$?" >> $GITHUB_ENV
       - uses: github/codeql-action/upload-sarif@v1
         with:
