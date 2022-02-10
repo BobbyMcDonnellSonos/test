@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Merge Upstream
+on:
+  pull_request:
+    branches:
+      - main
+      - ciandt/dev-portal
+      - forefront-inc/b2b-ltng
+    types:
+      - opened
+      - closed
+      - synchronize
+      - reopened
+jobs:
+  int:
+    name: Merge into truckin/int
+    uses: ./.github/workflows/merge-upstream.yml
+    with:
+      upstream: truckin/int
+  qa:
+    name: Merge into truckin/qa
+    uses: ./.github/workflows/merge-upstream.yml
+    with:
+      upstream: truckin/qa
+    needs:
+      - int
