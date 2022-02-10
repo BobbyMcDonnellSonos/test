@@ -23,14 +23,13 @@ jobs:
           EVENT_CONTEXT: ${{ toJSON(github) }}
         run: |
           echo $EVENT_CONTEXT
-  gh-check:
+  reuse-without-input:
     runs-on: ubuntu-latest
     steps:
-      - run: gh --version
-  commit:
+      - uses: ./.github/workflows/reusable.yml
+  reuse-with-input:
     runs-on: ubuntu-latest
-    if: >-
-      github.event.pull_request.base.ref == 'main' &&
-      github.event.merged == true
     steps:
-      - run: gh --version
+      - uses: ./.github/workflows/reusable.yml
+        with:
+          event-json: ${{ toJSON(github.event) }}

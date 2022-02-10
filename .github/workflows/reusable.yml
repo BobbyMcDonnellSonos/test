@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+on:
+  workflow_call:
+    inputs:
+      event-json:
+        type: string
+        required: false
+        default: ${{ toJSON( github.event ) }}
+jobs:
+  call:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "$EVENT"
+        env:
+          EVENT: ${{ toJSON( github.event ) }}
