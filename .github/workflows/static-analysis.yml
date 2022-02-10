@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Static Analysis
+on:
+  pull_request:
+    paths:
+      - "**/aura/**.js"
+      - "**/classes/*.cls"
+      - "**/lwc/**.js"
+      - "**/triggers/*.trigger"
+  push:
+    branches:
+      - ciandt/dev-portal
+      - forefront-inc/b2b-ltng
+      - main
+      - "truckin/*"
+    paths:
+      - "**/aura/**.js"
+      - "**/classes/*.cls"
+      - "**/lwc/**.js"
+      - "**/triggers/*.trigger"
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  run-pmd:
+    name: Run PMD
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: "temurin"
+          java-version: "11"
+      - uses: pmd/pmd-github-action@v1
+        id: pmd
+        with:
+          analyzeModifiedFilesOnly: ${{ github.event.event_name == 'pull_request' }}
+          rulesets: "./config/pmd-rule-set-63acc5ba-ff4b-48dc-be29-b37705b1a87e.xml"
+          sourcePath: force-app
+      - uses: github/codeql-action/upload-sarif@v1
+        with:
+          ref: ${{ github.ref }}
+          sha: ${{ github.sha }}
+          category: pmd/apex
+          sarif_file: pmd-report.sarif
+          wait-for-processing: true
+      - name: Run Result
+        if: steps.pmd.outputs.violations > 0 && github.event.event_name == 'pull_request'
+        run: exit 1
+  run-eslint:
+    name: Run ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+      - name: Install NPM Dependencies
+        run: |
+          npm install
+          npm install --no-save @microsoft/eslint-formatter-sarif
+      - name: Run ESLint
+        run: |
+          if [ "${{ github.event.event_name }}" = "pull_request" ]; then
+            git diff --name-only -z --diff-filter=d --no-renames HEAD^ HEAD -- "**/aura/**.js" "**/lwc/**.js"
+          else
+            git ls-files --full-name -z -- "**/aura/**.js" "**/lwc/**.js"
+          fi |
+
+          xargs -0 node_modules/.bin/eslint -f node_modules/@microsoft/eslint-formatter-sarif/sarif.js -o results.sarif ||
+          echo "ESLINT_STATUS=$?" >> $GITHUB_ENV
+      - uses: github/codeql-action/upload-sarif@v1
+        with:
+          ref: ${{ github.ref }}
+          sha: ${{ github.sha }}
+          category: eslint/javascript
+          sarif_file: results.sarif
+          wait-for-processing: true
+      - name: Run Result
+        if: github.event.event_name == 'pull_request'
+        run: exit $ESLINT_STATUS
+permissions:
+  security-events: write

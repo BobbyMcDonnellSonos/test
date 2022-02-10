@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "ESLint Analysis"
+on:
+  pull_request:
+    paths:
+      - "**/aura/**.js"
+      - "**/lwc/**.js"
+jobs:
+  run-eslint:
+    name: ESLint Run
+    runs-on: ubuntu-latest
+    env:
+      FILE_LIST: files-to-lint.txt
+      RESULT_FILE: ./results.sarif.json
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Run NPM install
+        run: npm install
+      - name: Run ESLint
+        run: |
+          git diff --name-only -z ${{ github.event.pull_request.base.sha }} HEAD -- "**/aura/**.js" "**/lwc/**.js" |
+          xargs -0 node_modules/.bin/eslint -o "$RESULT_FILE" -f @microsoft/eslint-formatter-sarif
+      - uses: github/codeql-action/upload-sarif@v1
+        if: always()
+        id: upload_sarif
+        with:
+          ref: ${{ github.ref }}
+          sha: ${{ github.sha }}
+          sarif_file: ${{ env.RESULT_FILE }}
+          wait-for-processing: true
+      - run: echo "${{ steps.upload-sarif.output.sarif-id }}"
+      - run: cat ${{ env.RESULT_FILE }}

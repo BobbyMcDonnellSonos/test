@@ -1,4 +1,6 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -7,13 +9,25 @@ on:
       - closed
       - reopened
       - synchronize
+  push:
+    branches:
+      - main
+defaults:
+  run:
+    shell: bash
 jobs:
-  something:
+  dump-event:
     runs-on: ubuntu-latest
     steps:
       - name: Dump Event JSON
-        shell: bash
         env:
-          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+          EVENT_CONTEXT: ${{ toJSON(github) }}
         run: |
           echo $EVENT_CONTEXT
+  reuse-without-input:
+    uses: ./.github/workflows/reusable.yml
+  reuse-with-input:
+    uses: ./.github/workflows/reusable.yml
+    with:
+      event-json: ${{ toJSON(github.event) }}
+      stuff: b

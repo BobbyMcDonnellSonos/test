@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+on:
+  workflow_call:
+    inputs:
+      event-json:
+        type: string
+        required: false
+        default: ${{ toJSON( github.event ) }}
+      stuff:
+        type: string
+        required: false
+jobs:
+  call:
+    runs-on: ubuntu-latest
+    steps:
+      - name: github context
+        run: echo "$EVENT"
+        env:
+          EVENT: ${{ toJSON( github.event ) }}
+      - name: input context
+        run: echo "$EVENT"
+        env:
+          EVENT: ${{ inputs.event-json }}
+      - name: compare
+        run: |
+          echo "$CONTEXT" | shasum
+          echo "$INPUT" | shasum
+        env:
+          CONTEXT: ${{ toJSON( github.event ) }}
+          INPUT: ${{ inputs.event-json }}
+      - run: echo "${{ inputs.stuff || 'a'}}"
