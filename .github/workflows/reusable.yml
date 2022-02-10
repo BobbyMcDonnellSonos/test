@@ -6,6 +6,9 @@ on:
         type: string
         required: false
         default: ${{ toJSON( github.event ) }}
+      stuff:
+        type: string
+        required: false
 jobs:
   call:
     runs-on: ubuntu-latest
@@ -25,3 +28,4 @@ jobs:
         env:
           CONTEXT: ${{ toJSON( github.event ) }}
           INPUT: ${{ inputs.event-json }}
+      - run: echo "${{ inputs.stuff || 'a'}}"
