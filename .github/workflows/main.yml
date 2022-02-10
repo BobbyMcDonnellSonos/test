@@ -24,12 +24,8 @@ jobs:
         run: |
           echo $EVENT_CONTEXT
   reuse-without-input:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: ./.github/workflows/reusable.yml
+    uses: ./.github/workflows/reusable.yml
   reuse-with-input:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: ./.github/workflows/reusable.yml
-        with:
-          event-json: ${{ toJSON(github.event) }}
+    uses: ./.github/workflows/reusable.yml
+    with:
+      event-json: ${{ toJSON(github.event) }}
