@@ -10,6 +10,18 @@ jobs:
   call:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "$EVENT"
+      - name: github context
+        run: echo "$EVENT"
         env:
           EVENT: ${{ toJSON( github.event ) }}
+      - name: input context
+        run: echo "$EVENT"
+        env:
+          EVENT: ${{ inputs.event-json }}
+      - name: compare
+        run: |
+          echo "$CONTEXT" | shasum
+          echo "$INPUT" | shasum
+        env:
+          CONTEXT: ${{ toJSON( github.event ) }}
+          INPUT: ${{ inputs.event-json }}
