@@ -13,11 +13,11 @@ on:
       - reopened
 jobs:
   int:
-    uses: ./.github/workflows/merge-upstream.yml
+    uses: ./.github/workflows/merge-upstream.yml@main
     with:
       upstream: truckin/int
   qa:
-    uses: ./.github/workflows/merge-upstream.yml
+    uses: ./.github/workflows/merge-upstream.yml@main
     with:
       upstream: truckin/qa
     needs:
