@@ -13,12 +13,10 @@ on:
       - reopened
 jobs:
   int:
-    name: Merge into truckin/int
     uses: ./.github/workflows/merge-upstream.yml
     with:
       upstream: truckin/int
   qa:
-    name: Merge into truckin/qa
     uses: ./.github/workflows/merge-upstream.yml
     with:
       upstream: truckin/qa
