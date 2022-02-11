@@ -14,9 +14,8 @@ on:
 env:
   GIT_COMMITTER_NAME: github-actions
   GIT_COMMITTER_EMAIL: github-actions@github.com
-  GIT_AUTHOR_NAME: ${{ github.event.pull_request.merged_by || github.actor }}
-  GIT_AUTHOR_DATE: ${{ github.event.pull_request.merged_at }}
-  HEAD_SHA: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+  GIT_AUTHOR_NAME: ${{ github.actor }}
+  HEAD_SHA: ${{ github.sha }}
   MERGE_MSG: |
     Merge pull request #${{ github.event.number }}
 concurrency:
