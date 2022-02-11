@@ -11,7 +11,6 @@ jobs:
   merge-upstream:
     name: Merge into ${{ inputs.upstream }}
     runs-on: ubuntu-latest
-    if: github.event.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
