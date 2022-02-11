@@ -11,36 +11,49 @@ on:
       - closed
       - synchronize
       - reopened
+env:
+  GIT_COMMITTER_NAME: github-actions
+  GIT_COMMITTER_EMAIL: github-actions@github.com
+  GIT_AUTHOR_NAME: ${{ github.event.pull_request.merged_by || github.actor }}
+  GIT_AUTHOR_DATE: ${{ github.event.pull_request.merged_at }}
+  HEAD_SHA: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+  MERGE_MSG: |
+    Merge pull request #${{ github.event.number }}
+concurrency:
+  group: ${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  merge-upstream:
-    strategy:
-      fail-fast: true
-      matrix:
-        upstream:
-          - "truckin/int"
-          - "truckin/qa"
-    name: ${{ matrix.upstream }}
+  int:
+    name: truckin/int
     runs-on: ubuntu-latest
-    env:
-      GIT_AUTHOR_NAME: ${{ github.event.pull_request.merged_by || github.actor }}
-      GIT_AUTHOR_DATE: ${{ github.event.pull_request.merged_at }}
-      HEAD_SHA: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ matrix.upstream }}
+          ref: truckin/int
           fetch-depth: 0
-      - id: merge
-        name: Merge
-        env:
-          MERGE_MSG: |
-            Merge pull request #${{ github.event.number }} into ${{ matrix.upstream }}
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git fetch origin $HEAD_SHA
-          git merge --no-ff -m "$MERGE_MSG" $HEAD_SHA
+      - name: Fetch
+        run: git fetch origin $HEAD_SHA
+      - name: Merge
+        run: git merge --no-ff -m "$MERGE_MSG" $HEAD_SHA
+      - name: Push
+        if: github.event.pull_request.merged == true
+        run: git push
+  qa:
+    needs:
+      - int
+    name: truckin/qa
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: truckin/qa
+          fetch-depth: 0
+      - name: Fetch
+        run: git fetch origin $HEAD_SHA
+      - name: Merge
+        run: git merge --no-ff -m "$MERGE_MSG" $HEAD_SHA
       - name: Push
         if: github.event.pull_request.merged == true
         run: git push
