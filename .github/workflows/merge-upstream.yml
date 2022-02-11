@@ -12,8 +12,10 @@ jobs:
     name: Merge into ${{ inputs.upstream }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v2
         with:
           ref: ${{ inputs.upstream }}
           fetch-depth: 0
@@ -28,7 +30,6 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git fetch origin $HEAD_SHA
           git merge --no-ff -m "$MERGE_MSG" $HEAD_SHA
       - name: Push
         if: github.event.pull_request.merged == true
