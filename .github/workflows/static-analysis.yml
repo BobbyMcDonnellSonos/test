@@ -35,10 +35,10 @@ jobs:
       - uses: pmd/pmd-github-action@v1
         id: pmd
         with:
-          analyzeModifiedFilesOnly: ${{ github.event.event_name == 'pull_request' }}
+          analyzeModifiedFilesOnly: ${{ github.event_name == 'pull_request' }}
           rulesets: "./config/pmd-rule-set-63acc5ba-ff4b-48dc-be29-b37705b1a87e.xml"
           sourcePath: force-app
-          createGitHubAnnotations: ${{ github.event.event_name == 'pull_request' }}
+          createGitHubAnnotations: ${{ github.event_name == 'pull_request' }}
       - uses: github/codeql-action/upload-sarif@v1
         with:
           ref: ${{ github.ref }}
@@ -47,7 +47,7 @@ jobs:
           sarif_file: pmd-report.sarif
           wait-for-processing: true
       - name: Run Result
-        if: steps.pmd.outputs.violations != 0 && github.event.event_name == 'pull_request'
+        if: steps.pmd.outputs.violations != 0 && github.event_name == 'pull_request'
         run: exit 1
   run-eslint:
     name: Run ESLint
@@ -62,7 +62,7 @@ jobs:
           npm install --no-save @microsoft/eslint-formatter-sarif
       - name: Run ESLint
         env:
-          EVENT_NAME: ${{ github.event.event_name }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           if [ "$EVENT_NAME" = "pull_request" ]; then
             git diff --name-only -z --diff-filter=d --no-renames HEAD^ HEAD -- "**/aura/**.js" "**/lwc/**.js"
