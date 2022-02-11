@@ -11,16 +11,48 @@ on:
       - closed
       - synchronize
       - reopened
+env:
+  GIT_COMMITTER_NAME: github-actions
+  GIT_COMMITTER_EMAIL: github-actions@github.com
+  GIT_AUTHOR_NAME: ${{ github.actor }}
+  HEAD_SHA: ${{ github.sha }}
+  MERGE_MSG: |
+    Merge pull request #${{ github.event.number }}
+concurrency:
+  group: ${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   int:
-    name: Merge into truckin/int
-    uses: ./.github/workflows/merge-upstream.yml
-    with:
-      upstream: truckin/int
+    name: truckin/int
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: truckin/int
+          fetch-depth: 0
+      - name: Fetch
+        run: git fetch origin $HEAD_SHA
+      - name: Merge
+        run: git merge --no-ff -m "$MERGE_MSG" $HEAD_SHA
+      - name: Push
+        if: github.event.pull_request.merged == true
+        run: git push
   qa:
-    name: Merge into truckin/qa
-    uses: ./.github/workflows/merge-upstream.yml
-    with:
-      upstream: truckin/qa
     needs:
       - int
+    name: truckin/qa
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: truckin/qa
+          fetch-depth: 0
+      - name: Fetch
+        run: git fetch origin $HEAD_SHA
+      - name: Merge
+        run: git merge --no-ff -m "$MERGE_MSG" $HEAD_SHA
+      - name: Push
+        if: github.event.pull_request.merged == true
+        run: git push
