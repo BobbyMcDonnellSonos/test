@@ -39,7 +39,7 @@ permissions:
   contents: write
   deployments: none
   discussions: none
-  id-token: read
+  id-token: none
   issues: none
   packages: none
   pages: none
