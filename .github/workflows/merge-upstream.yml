@@ -14,6 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          ref: ${{ github.ref }}
           fetch-depth: 0
       - uses: actions/checkout@v2
         with:
@@ -24,13 +25,12 @@ jobs:
         env:
           GIT_AUTHOR_NAME: ${{ github.event.pull_request.merged_by }}
           GIT_AUTHOR_DATE: ${{ github.event.pull_request.merged_at }}
-          HEAD_SHA: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
           MERGE_MSG: |
             Merge pull request #${{ github.event.number }} into ${{ inputs.upstream }}
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git merge --no-ff -m "$MERGE_MSG" $HEAD_SHA
+          git merge --no-ff -m "$MERGE_MSG" ${{ github.ref }}
       - name: Push
         if: github.event.pull_request.merged == true
         run: git push
