@@ -1,5 +1,5 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Deployment
-
 on:
   pull_request:
     branches:
@@ -8,16 +8,8 @@ on:
       - opened
       - synchronize
       - reopened
-
 jobs:
   deployment:
-    runs-on: ubuntu-latest
-    environment: 
-      name: foo
-    env:
-      GITHUB_JSON: ${{toJSON(github)}}
-    steps:
-      - name: Dump Event JSON
-        env:
-          EVENT_CONTEXT: ${{ toJSON(github) }}
-        run: echo $EVENT_CONTEXT
+    uses: ./.github/workflows/deploy-call.yml
+    with:
+      environment: foo
