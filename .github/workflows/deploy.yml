@@ -1,0 +1,20 @@
+name: Deployment
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment: 
+      name: foo
+    env:
+      GITHUB_JSON: ${{toJSON(github)}}
+    steps:
+      - run: echo "$GITHUB_JSON"
