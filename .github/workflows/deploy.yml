@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Deployment
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+jobs:
+  deployment:
+    uses: ./.github/workflows/deploy-call.yml
+    with:
+      environment: foo
