@@ -5,7 +5,7 @@ on:
       - edited
 jobs:
   echo:
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     steps:
       - name: echo
         run: cat $GITHUB_EVENT_PATH	
