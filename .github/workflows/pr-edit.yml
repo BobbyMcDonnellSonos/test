@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+on:
+  pull_request:
+    types:
+      - edited
+jobs:
+  echo:
+    runs-on: ubuntu-lates
+    steps:
+      - name: echo
+        run: cat $GITHUB_EVENT_PATH	
