@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+on:
+  push:
+    branches:
+      - main
+jobs:
+  dump-event:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::debug::Set the Octocat variable"
+          echo "::notice::Here's a notice"
+          echo "::warning::Here's a warning"
+          echo "::error::Here's an error"
+          echo "::group::My title"
+          echo "Inside group"
+          echo "::notice::Here's a notice"
+          echo "::warning::Here's a warning"
+          echo "::error::Here's an error"
+          echo "::endgroup::"
